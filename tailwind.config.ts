@@ -52,6 +52,16 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				seat: {
+					available: 'hsl(var(--seat-available))',
+					'available-foreground': 'hsl(var(--seat-available-foreground))',
+					selected: 'hsl(var(--seat-selected))',
+					'selected-foreground': 'hsl(var(--seat-selected-foreground))',
+					progress: 'hsl(var(--seat-progress))',
+					'progress-foreground': 'hsl(var(--seat-progress-foreground))',
+					booked: 'hsl(var(--seat-booked))',
+					'booked-foreground': 'hsl(var(--seat-booked-foreground))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
