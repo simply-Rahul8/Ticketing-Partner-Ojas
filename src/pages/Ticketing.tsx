@@ -2,37 +2,40 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { SeatChart } from '@/components/SeatChart';
 import { BookingSummary } from '@/components/BookingSummary';
+import { BookingForm } from '@/components/BookingForm';
 import { AdminLogin } from '@/components/AdminLogin';
 import { AdminDashboard } from '@/components/AdminDashboard';
-import { useBooking } from '@/hooks/useBooking';
+import { useSupabaseBooking } from '@/hooks/useSupabaseBooking';
 import { Shield, Ticket } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Ticketing() {
   const [isAdminView, setIsAdminView] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showBookingForm, setShowBookingForm] = useState(false);
   
   const {
     seats,
     selectedSeats,
     bookings,
+    isLoading,
     toggleSeat,
     bookSelectedSeats,
     approveBooking,
     refuseBooking,
     getSeatLayout,
-  } = useBooking();
+  } = useSupabaseBooking();
 
   const handleBookNow = () => {
     if (selectedSeats.length === 0) {
       toast.error('Please select at least one seat');
       return;
     }
+    setShowBookingForm(true);
+  };
 
-    const bookingId = bookSelectedSeats();
-    if (bookingId) {
-      toast.success(`Booking created! Seats: ${selectedSeats.join(', ')}`);
-    }
+  const handleBookingConfirm = async (bookingData: { name: string; email: string; phone: string }) => {
+    await bookSelectedSeats(bookingData);
   };
 
   const handleAdminLogin = (loginSuccess: boolean) => {
@@ -59,6 +62,19 @@ export default function Ticketing() {
           onRefuseBooking={refuseBooking}
           onLogout={handleLogout}
         />
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
+            <Ticket className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <p className="text-muted-foreground">Loading seat data...</p>
+        </div>
+      </div>
     );
   }
 
@@ -121,6 +137,14 @@ export default function Ticketing() {
           </div>
         </div>
       </main>
+
+      {/* Booking Form Modal */}
+      <BookingForm
+        isOpen={showBookingForm}
+        onClose={() => setShowBookingForm(false)}
+        selectedSeats={selectedSeats}
+        onConfirm={handleBookingConfirm}
+      />
     </div>
   );
 }

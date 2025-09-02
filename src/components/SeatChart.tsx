@@ -18,16 +18,16 @@ const SeatButton: React.FC<{
         return 'bg-seat-available hover:bg-seat-available/80 text-seat-available-foreground border-seat-available';
       case 'selected':
         return 'bg-seat-selected text-seat-selected-foreground border-seat-selected shadow-lg transform scale-105';
-      case 'progress':
+      case 'held':
         return 'bg-seat-progress text-seat-progress-foreground border-seat-progress cursor-not-allowed';
-      case 'booked':
+      case 'confirmed':
         return 'bg-seat-booked text-seat-booked-foreground border-seat-booked cursor-not-allowed';
       default:
         return 'bg-seat-available';
     }
   };
 
-  const isDisabled = seat.status === 'progress' || seat.status === 'booked';
+  const isDisabled = seat.status === 'held' || seat.status === 'confirmed';
 
   return (
     <button
@@ -104,11 +104,11 @@ export const SeatChart: React.FC<SeatChartProps> = ({
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-seat-progress border border-seat-progress" />
-          <span>In Progress</span>
+          <span>Held</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-seat-booked border border-seat-booked" />
-          <span>Booked</span>
+          <span>Confirmed</span>
         </div>
       </div>
     </div>

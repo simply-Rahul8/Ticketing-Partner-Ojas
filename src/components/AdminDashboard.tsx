@@ -27,8 +27,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onRefuseBooking,
   onLogout,
 }) => {
-  const pendingBookings = bookings.filter(b => b.status === 'progress');
-  const approvedBookings = bookings.filter(b => b.status === 'approved');
+  const pendingBookings = bookings.filter(b => b.status === 'held');
+  const approvedBookings = bookings.filter(b => b.status === 'confirmed');
 
   const handleApprove = (bookingId: string) => {
     onApproveBooking(bookingId);
@@ -103,7 +103,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <Users className="w-4 h-4 text-purple-500" />
                 <div>
                   <p className="text-2xl font-bold">
-                    {bookings.reduce((acc, b) => acc + b.seats.length, 0)}
+                    {bookings.length}
                   </p>
                   <p className="text-xs text-muted-foreground">Seats Booked</p>
                 </div>
@@ -132,20 +132,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     key={booking.id}
                     className="flex items-center justify-between p-4 border rounded-lg"
                   >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary">
-                          {booking.seats.length} seat{booking.seats.length > 1 ? 's' : ''}
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">
-                          {booking.seats.join(', ')}
-                        </span>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">
+                            Seat {booking.seat_id}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {booking.user_name} ({booking.user_email})
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(booking.created_at).toLocaleString()}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Calendar className="w-3 h-3" />
-                        {formatDate(booking.timestamp)}
-                      </div>
-                    </div>
                     <div className="flex gap-2">
                       <Button
                         onClick={() => handleRefuse(booking.id)}
@@ -191,20 +191,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     key={booking.id}
                     className="flex items-center justify-between p-4 border rounded-lg bg-green-50/10"
                   >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="default" className="bg-green-600">
-                          {booking.seats.length} seat{booking.seats.length > 1 ? 's' : ''}
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">
-                          {booking.seats.join(', ')}
-                        </span>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="default" className="bg-green-600">
+                            Seat {booking.seat_id}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {booking.user_name} ({booking.user_email})
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(booking.created_at).toLocaleString()}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Calendar className="w-3 h-3" />
-                        {formatDate(booking.timestamp)}
-                      </div>
-                    </div>
                     <Badge variant="default" className="bg-green-600">
                       <CheckCircle className="w-3 h-3 mr-1" />
                       Approved

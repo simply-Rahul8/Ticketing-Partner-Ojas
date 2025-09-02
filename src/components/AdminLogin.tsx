@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Eye, EyeOff } from 'lucide-react';
-import { toast } from 'sonner';
+import { useSupabaseAdmin } from '@/hooks/useSupabaseAdmin';
 
 interface AdminLoginProps {
   onLogin: (isAdmin: boolean) => void;
@@ -14,23 +14,15 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, isLoading } = useSupabaseAdmin();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    // Simulate authentication delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    if (username === 'OG2025' && password === 'OGPSPKSVTronneby@') {
-      toast.success('Welcome, Administrator!');
+    
+    const success = await login(username, password);
+    if (success) {
       onLogin(true);
-    } else {
-      toast.error('Invalid credentials');
     }
-
-    setIsLoading(false);
   };
 
   return (
