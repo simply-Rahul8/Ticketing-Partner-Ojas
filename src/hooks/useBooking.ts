@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Seat, Booking, SeatStatus } from '@/types/booking';
 
 const SEAT_LAYOUT = [
@@ -18,6 +18,7 @@ export function useBooking() {
   const [seats, setSeats] = useState<Seat[]>([]);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize seats
   useEffect(() => {
@@ -53,6 +54,25 @@ export function useBooking() {
     }
   }, []);
 
+  const clearSelectionTimeout = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, []);
+
+  const startSelectionTimeout = useCallback(() => {
+    clearSelectionTimeout();
+    timeoutRef.current = setTimeout(() => {
+      setSeats(prevSeats => 
+        prevSeats.map(seat => 
+          seat.status === 'selected' ? { ...seat, status: 'available' } : seat
+        )
+      );
+      setSelectedSeats([]);
+    }, 5 * 60 * 1000); // 5 minutes
+  }, [clearSelectionTimeout]);
+
   const toggleSeat = useCallback((seatId: string) => {
     setSeats(prevSeats => {
       const seatIndex = prevSeats.findIndex(s => s.id === seatId);
@@ -66,18 +86,32 @@ export function useBooking() {
       
       if (seat.status === 'available') {
         newSeats[seatIndex] = { ...seat, status: 'selected' };
-        setSelectedSeats(prev => [...prev, seatId]);
+        setSelectedSeats(prev => {
+          const updated = [...prev, seatId];
+          if (updated.length === 1) {
+            startSelectionTimeout();
+          }
+          return updated;
+        });
       } else {
         newSeats[seatIndex] = { ...seat, status: 'available' };
-        setSelectedSeats(prev => prev.filter(id => id !== seatId));
+        setSelectedSeats(prev => {
+          const updated = prev.filter(id => id !== seatId);
+          if (updated.length === 0) {
+            clearSelectionTimeout();
+          }
+          return updated;
+        });
       }
       
       return newSeats;
     });
-  }, []);
+  }, [startSelectionTimeout, clearSelectionTimeout]);
 
   const bookSelectedSeats = useCallback(() => {
     if (selectedSeats.length === 0) return null;
+
+    clearSelectionTimeout();
 
     const bookingId = `booking-${Date.now()}`;
     const newBooking: Booking = {
@@ -112,7 +146,7 @@ export function useBooking() {
     window.open(formUrl, '_blank');
 
     return bookingId;
-  }, [selectedSeats, bookings]);
+  }, [selectedSeats, bookings, clearSelectionTimeout]);
 
   const approveBooking = useCallback((bookingId: string) => {
     setBookings(prevBookings => {
@@ -140,6 +174,28 @@ export function useBooking() {
     });
   }, []);
 
+  const refuseBooking = useCallback((bookingId: string) => {
+    setBookings(prevBookings => {
+      const bookingToRemove = prevBookings.find(b => b.id === bookingId);
+      const updatedBookings = prevBookings.filter(booking => booking.id !== bookingId);
+      
+      localStorage.setItem('theatre-bookings', JSON.stringify(updatedBookings));
+      
+      // Make seats available again
+      if (bookingToRemove) {
+        setSeats(prevSeats => 
+          prevSeats.map(seat => 
+            bookingToRemove.seats.includes(seat.id)
+              ? { ...seat, status: 'available' as SeatStatus }
+              : seat
+          )
+        );
+      }
+      
+      return updatedBookings;
+    });
+  }, []);
+
   const getSeatLayout = () => SEAT_LAYOUT;
 
   return {
@@ -149,6 +205,7 @@ export function useBooking() {
     toggleSeat,
     bookSelectedSeats,
     approveBooking,
+    refuseBooking,
     getSeatLayout,
   };
 }

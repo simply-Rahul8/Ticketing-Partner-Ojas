@@ -19,6 +19,7 @@ export default function Ticketing() {
     toggleSeat,
     bookSelectedSeats,
     approveBooking,
+    refuseBooking,
     getSeatLayout,
   } = useBooking();
 
@@ -52,11 +53,12 @@ export default function Ticketing() {
 
   if (isAdminView && isAdmin) {
     return (
-      <AdminDashboard
-        bookings={bookings}
-        onApproveBooking={approveBooking}
-        onLogout={handleLogout}
-      />
+        <AdminDashboard
+          bookings={bookings}
+          onApproveBooking={approveBooking}
+          onRefuseBooking={refuseBooking}
+          onLogout={handleLogout}
+        />
     );
   }
 

@@ -8,7 +8,8 @@ import {
   Users, 
   Ticket,
   LogOut,
-  Calendar
+  Calendar,
+  X
 } from 'lucide-react';
 import { Booking } from '@/types/booking';
 import { toast } from 'sonner';
@@ -16,12 +17,14 @@ import { toast } from 'sonner';
 interface AdminDashboardProps {
   bookings: Booking[];
   onApproveBooking: (bookingId: string) => void;
+  onRefuseBooking: (bookingId: string) => void;
   onLogout: () => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   bookings,
   onApproveBooking,
+  onRefuseBooking,
   onLogout,
 }) => {
   const pendingBookings = bookings.filter(b => b.status === 'progress');
@@ -30,6 +33,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleApprove = (bookingId: string) => {
     onApproveBooking(bookingId);
     toast.success('Booking approved successfully!');
+  };
+
+  const handleRefuse = (bookingId: string) => {
+    onRefuseBooking(bookingId);
+    toast.error('Booking refused and seats released');
   };
 
   const formatDate = (timestamp: number) => {
@@ -138,14 +146,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         {formatDate(booking.timestamp)}
                       </div>
                     </div>
-                    <Button
-                      onClick={() => handleApprove(booking.id)}
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Approve
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleRefuse(booking.id)}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Refuse
+                      </Button>
+                      <Button
+                        onClick={() => handleApprove(booking.id)}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Approve
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
