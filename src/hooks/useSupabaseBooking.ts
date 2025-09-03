@@ -54,7 +54,7 @@ export function useSupabaseBooking() {
 
       if (bookingsError) throw bookingsError;
 
-      setBookings(bookingsData || []);
+      setBookings((bookingsData || []) as Booking[]);
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Failed to load seat data');

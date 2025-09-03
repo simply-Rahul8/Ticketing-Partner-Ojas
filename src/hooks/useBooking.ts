@@ -43,11 +43,11 @@ export function useBooking() {
       
       // Update seat statuses based on bookings
       initialSeats.forEach(seat => {
-        const booking = parsedBookings.find((b: Booking) => 
-          b.seats.includes(seat.id)
+        const booking = parsedBookings.find((b: any) => 
+          b.seats && b.seats.includes(seat.id)
         );
         if (booking) {
-          seat.status = booking.status === 'approved' ? 'booked' : 'progress';
+          seat.status = booking.status === 'confirmed' ? 'confirmed' : 'held';
         }
       });
       setSeats([...initialSeats]);
@@ -113,25 +113,31 @@ export function useBooking() {
 
     clearSelectionTimeout();
 
-    const bookingId = `booking-${Date.now()}`;
-    const newBooking: Booking = {
-      id: bookingId,
-      seats: [...selectedSeats],
-      status: 'progress',
-      timestamp: Date.now(),
-    };
+    // Create individual bookings for each selected seat
+    const newBookings = selectedSeats.map(seatId => ({
+      id: `booking-${Date.now()}-${seatId}`,
+      seat_id: seatId,
+      user_name: null,
+      user_email: null,
+      user_phone: null,
+      status: 'held' as const,
+      created_at: new Date().toISOString(),
+      held_at: new Date().toISOString(),
+      confirmed_at: null,
+      google_form_response_id: null,
+    }));
 
-    // Update seat statuses to 'progress'
+    // Update seat statuses to 'held'
     setSeats(prevSeats => 
       prevSeats.map(seat => 
         selectedSeats.includes(seat.id) 
-          ? { ...seat, status: 'progress' as SeatStatus }
+          ? { ...seat, status: 'held' as SeatStatus }
           : seat
       )
     );
 
-    // Add booking
-    const updatedBookings = [...bookings, newBooking];
+    // Add bookings
+    const updatedBookings = [...bookings, ...newBookings];
     setBookings(updatedBookings);
     localStorage.setItem('theatre-bookings', JSON.stringify(updatedBookings));
 
@@ -145,14 +151,14 @@ export function useBooking() {
     // Open Google Form in new tab
     window.open(formUrl, '_blank');
 
-    return bookingId;
+    return newBookings[0]?.id || null;
   }, [selectedSeats, bookings, clearSelectionTimeout]);
 
   const approveBooking = useCallback((bookingId: string) => {
     setBookings(prevBookings => {
       const updatedBookings = prevBookings.map(booking => 
         booking.id === bookingId 
-          ? { ...booking, status: 'approved' as const }
+          ? { ...booking, status: 'confirmed' as const, confirmed_at: new Date().toISOString() }
           : booking
       );
       
@@ -163,8 +169,8 @@ export function useBooking() {
       if (approvedBooking) {
         setSeats(prevSeats => 
           prevSeats.map(seat => 
-            approvedBooking.seats.includes(seat.id)
-              ? { ...seat, status: 'booked' as SeatStatus }
+            seat.id === approvedBooking.seat_id
+              ? { ...seat, status: 'confirmed' as SeatStatus }
               : seat
           )
         );
@@ -185,7 +191,7 @@ export function useBooking() {
       if (bookingToRemove) {
         setSeats(prevSeats => 
           prevSeats.map(seat => 
-            bookingToRemove.seats.includes(seat.id)
+            seat.id === bookingToRemove.seat_id
               ? { ...seat, status: 'available' as SeatStatus }
               : seat
           )
