@@ -213,17 +213,7 @@ export function useSupabaseBooking() {
 
       const newBookings = await Promise.all(bookingPromises);
 
-      // Update seat statuses to 'held' in database
-      const updatePromises = selectedSeats.map(async (seatId) => {
-        const { error } = await supabase
-          .from('seats')
-          .update({ status: 'held' })
-          .eq('seat_id', seatId);
-
-        if (error) throw error;
-      });
-
-      await Promise.all(updatePromises);
+      // Seat status will be synced via DB trigger; no direct seat update needed
 
       // Update local state immediately
       setSeats(prevSeats => 
@@ -269,13 +259,7 @@ export function useSupabaseBooking() {
 
       if (fetchError) throw fetchError;
 
-      // Update seat status to confirmed
-      const { error: seatError } = await supabase
-        .from('seats')
-        .update({ status: 'confirmed' })
-        .eq('seat_id', booking.seat_id);
-
-      if (seatError) throw seatError;
+      // Seat status change is handled by DB trigger
 
       toast.success('Booking approved successfully!');
     } catch (error) {
@@ -303,13 +287,7 @@ export function useSupabaseBooking() {
 
       if (deleteError) throw deleteError;
 
-      // Make seat available again
-      const { error: seatError } = await supabase
-        .from('seats')
-        .update({ status: 'available' })
-        .eq('seat_id', booking.seat_id);
-
-      if (seatError) throw seatError;
+      // Seat release is handled by DB trigger
 
       toast.error('Booking refused and seat released');
     } catch (error) {
