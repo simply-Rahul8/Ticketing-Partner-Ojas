@@ -11,7 +11,7 @@ interface AuthPageProps {
   onLogin: (isAdmin: boolean) => void;
 }
 
-type AuthMode = 'login' | 'register' | 'forgot';
+type AuthMode = 'login' | 'forgot';
 
 export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
   const [mode, setMode] = useState<AuthMode>('login');
@@ -26,36 +26,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
     setIsLoading(true);
 
     try {
-      if (mode === 'register') {
-        if (password !== confirmPassword) {
-          toast.error('Passwords do not match');
-          return;
-        }
-
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`
-          }
-        });
-
-        if (error) {
-          if (error.message.includes('already registered')) {
-            toast.error('This email is already registered. Try logging in instead.');
-          } else {
-            toast.error(error.message);
-          }
-          return;
-        }
-
-        if (data.user && !data.session) {
-          toast.success('Please check your email for verification link');
-        } else {
-          toast.success('Account created successfully!');
-          onLogin(true);
-        }
-      } else if (mode === 'login') {
+      if (mode === 'login') {
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -91,7 +62,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
 
   const getTitle = () => {
     switch (mode) {
-      case 'register': return 'Create Admin Account';
       case 'forgot': return 'Reset Password';
       default: return 'Admin Portal';
     }
@@ -100,13 +70,11 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
   const getButtonText = () => {
     if (isLoading) {
       switch (mode) {
-        case 'register': return 'Creating Account...';
         case 'forgot': return 'Sending Email...';
         default: return 'Signing In...';
       }
     }
     switch (mode) {
-      case 'register': return 'Create Account';
       case 'forgot': return 'Send Reset Email';
       default: return 'Sign In';
     }
@@ -124,8 +92,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
             <p className="text-muted-foreground mt-2">
               {mode === 'forgot' 
                 ? 'Enter your email to reset your password'
-                : mode === 'register'
-                ? 'Create your administrator account'
                 : 'Access the theatre management system'
               }
             </p>
@@ -180,23 +146,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
               </div>
             )}
 
-            {mode === 'register' && (
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="confirmPassword"
-                    type={showPassword ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm your password"
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-            )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {getButtonText()}
@@ -204,30 +153,17 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
 
             <div className="text-center space-y-2">
               {mode === 'login' && (
-                <>
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="text-sm"
-                    onClick={() => setMode('forgot')}
-                  >
-                    Forgot your password?
-                  </Button>
-                  <div>
-                    <span className="text-sm text-muted-foreground">Don't have an account? </span>
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="text-sm p-0"
-                      onClick={() => setMode('register')}
-                    >
-                      Create one
-                    </Button>
-                  </div>
-                </>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-sm"
+                  onClick={() => setMode('forgot')}
+                >
+                  Forgot your password?
+                </Button>
               )}
 
-              {(mode === 'register' || mode === 'forgot') && (
+              {mode === 'forgot' && (
                 <Button
                   type="button"
                   variant="link"

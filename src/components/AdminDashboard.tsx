@@ -132,14 +132,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     key={booking.id}
                     className="flex items-center justify-between p-4 border rounded-lg"
                   >
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary">
                             Seat {booking.seat_id}
                           </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            {booking.user_name} ({booking.user_email})
-                          </span>
+                        </div>
+                        <div className="space-y-1 text-sm">
+                          <div><strong>Name:</strong> {booking.user_name || 'N/A'}</div>
+                          <div><strong>Email:</strong> {booking.user_email || 'N/A'}</div>
+                          <div><strong>Phone:</strong> {booking.user_phone || 'N/A'}</div>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Calendar className="w-3 h-3" />
@@ -191,14 +193,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     key={booking.id}
                     className="flex items-center justify-between p-4 border rounded-lg bg-green-50/10"
                   >
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <Badge variant="default" className="bg-green-600">
                             Seat {booking.seat_id}
                           </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            {booking.user_name} ({booking.user_email})
-                          </span>
+                        </div>
+                        <div className="space-y-1 text-sm">
+                          <div><strong>Name:</strong> {booking.user_name || 'N/A'}</div>
+                          <div><strong>Email:</strong> {booking.user_email || 'N/A'}</div>
+                          <div><strong>Phone:</strong> {booking.user_phone || 'N/A'}</div>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Calendar className="w-3 h-3" />
