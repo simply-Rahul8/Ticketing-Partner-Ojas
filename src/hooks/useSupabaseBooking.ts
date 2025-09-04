@@ -213,6 +213,23 @@ export function useSupabaseBooking() {
 
       const newBookings = await Promise.all(bookingPromises);
 
+      // Send email notification
+      try {
+        await supabase.functions.invoke('send-booking-notification', {
+          body: {
+            userName: bookingData.name,
+            userEmail: bookingData.email,
+            userPhone: bookingData.phone,
+            seatIds: selectedSeats,
+            bookingId: newBookings[0]?.id || 'Unknown'
+          }
+        });
+        console.log('Email notification sent successfully');
+      } catch (emailError) {
+        console.error('Error sending email notification:', emailError);
+        // Don't fail the booking if email fails
+      }
+
       // Seat status will be synced via DB trigger; no direct seat update needed
 
       // Update local state immediately

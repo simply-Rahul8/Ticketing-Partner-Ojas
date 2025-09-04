@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { SeatChart } from '@/components/SeatChart';
 import { BookingSummary } from '@/components/BookingSummary';
 import { BookingForm } from '@/components/BookingForm';
-import { AdminLogin } from '@/components/AdminLogin';
+import { AuthPage } from '@/components/AuthPage';
 import { AdminDashboard } from '@/components/AdminDashboard';
 import { useSupabaseBooking } from '@/hooks/useSupabaseBooking';
 import { Shield, Ticket } from 'lucide-react';
@@ -51,7 +51,7 @@ export default function Ticketing() {
   };
 
   if (isAdminView && !isAdmin) {
-    return <AdminLogin onLogin={handleAdminLogin} />;
+    return <AuthPage onLogin={handleAdminLogin} />;
   }
 
   if (isAdminView && isAdmin) {
